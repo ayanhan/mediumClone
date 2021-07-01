@@ -1,7 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {Link, Redirect} from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
-import GlobalFeed from "../globalFeed";
+import useLocalStorage from "../../hooks/useLocalStorage";
+import {CurrentUserContext} from "../../contexts/currentUser";
+import BackendErrorMessages from "../../components/BackendErrorMessages";
 
 const Authentication = (props) => {
   const isLogin = props.match.path === '/login'
@@ -12,8 +14,11 @@ const Authentication = (props) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
-  const [isSuccesfullSubmit, setIsSuccesfullSubmit] = useState(false)
+  const [isSuccessfullySubmit, setIsSuccessfullySubmit] = useState(false)
   const [{response, isLoading, error}, doFetch] = useFetch(apiUrl)
+  const [, setToken] = useLocalStorage('token')
+  const [, setCurrentUserState] = useContext(CurrentUserContext)
+
 
   const handleSubmit = (event) => {
     event.preventDefault()
@@ -30,11 +35,17 @@ const Authentication = (props) => {
     if (!response) {
       return
     }
-    localStorage.setItem('token', response.user.token)
-    setIsSuccesfullSubmit(true)
-  }, [response])
+    setToken(response.user.token)
+    setIsSuccessfullySubmit(true)
+    setCurrentUserState(state => ({
+      ...state,
+      isLoggedIn: true,
+      isLoading: false,
+      currentUser: response.user
+    }))
+  }, [response, setToken, setCurrentUserState])
 
-  if (isSuccesfullSubmit) {
+  if (isSuccessfullySubmit) {
     return <Redirect to="/" />
   }
 
@@ -45,6 +56,7 @@ const Authentication = (props) => {
             <div className="col-md-6 offset-md-3 col-xs-12">
               <h1 className="text-xs-center mb-2">{pageTitle}</h1>
               <form onSubmit={handleSubmit}>
+                {error && <BackendErrorMessages backendErrors={error.errors} />}
                 <fieldset>
                   {!isLogin && (
                       <fieldset className="form-group">
