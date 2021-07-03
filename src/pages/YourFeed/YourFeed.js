@@ -7,13 +7,13 @@ import {stringify} from "query-string"
 import PopularTags from "../../components/PopularTags";
 import FeedToggler from "../../components/FeedToggler";
 
-const GlobalFeed = ({location, match}) => {
+const YourFeed = ({location, match}) => {
   const {offset, currentPage} = getPaginator(location.search)
   const stringifiedParams = stringify({
     limit,
     offset
   })
-  const [{response, isLoading, error}, doFetch] = useFetch(`https://conduit.productionready.io/api/articles?${stringifiedParams}`)
+  const [{response, isLoading, error}, doFetch] = useFetch(`https://conduit.productionready.io/api/articles/feed?${stringifiedParams}`)
   const url = match.url
 
   useEffect(() => {
@@ -48,4 +48,4 @@ const GlobalFeed = ({location, match}) => {
   );
 };
 
-export default GlobalFeed;
+export default YourFeed;

@@ -7,18 +7,21 @@ import {stringify} from "query-string"
 import PopularTags from "../../components/PopularTags";
 import FeedToggler from "../../components/FeedToggler";
 
-const GlobalFeed = ({location, match}) => {
+const TagFeed = ({location, match}) => {
+  const tagName = match.params.slug
+
   const {offset, currentPage} = getPaginator(location.search)
   const stringifiedParams = stringify({
     limit,
-    offset
+    offset,
+    tag: tagName
   })
   const [{response, isLoading, error}, doFetch] = useFetch(`https://conduit.productionready.io/api/articles?${stringifiedParams}`)
   const url = match.url
 
   useEffect(() => {
     doFetch()
-  }, [doFetch, currentPage])
+  }, [doFetch, currentPage, tagName])
   return (
       <div className="home-page">
         <div className="banner">
@@ -29,7 +32,7 @@ const GlobalFeed = ({location, match}) => {
         <div className="container page">
           <div className="row">
             <div className="col-md-9">
-              <FeedToggler tagName='' />
+              <FeedToggler tagName={tagName} />
               {isLoading && <div>Loading...</div>}
               {error && <div className="danger">Some Error Happened</div>}
               {!isLoading && response && (
@@ -48,4 +51,4 @@ const GlobalFeed = ({location, match}) => {
   );
 };
 
-export default GlobalFeed;
+export default TagFeed;
